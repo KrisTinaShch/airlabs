@@ -1,3 +1,9 @@
+@import url(https://fonts.googleapis.com/css?family=Inter:100,200,300,regular,500,600,700,800,900);
+
+* {
+  font-family: Inter;
+}
+
 /* bootstrap styles  */
 p {
   margin: 0;
@@ -45,7 +51,7 @@ p {
   margin: 15px auto;
 }
 
-.accordion-box-shadow{
+.accordion-box-shadow {
   box-shadow: 2px 4px 10px 0px rgba(0, 0, 0, 0.15);
   transition: 0.3s ease;
 }
@@ -70,7 +76,6 @@ p {
 }
 
 .flight-status,
-.flight-start-place,
 .flight-iata {
   grid-row: 2;
 }
@@ -84,11 +89,35 @@ p {
   background-color: transparent;
   box-shadow: none;
 }
-.st0{
-  stroke: #7d869b ;
+
+.st0 {
+  stroke: #7d869b;
 }
 
-button.active .st0{
-  stroke: #3D5DE2 ;
+button.active .st0 {
+  stroke: #3D5DE2;
 }
+
+.flight-time {
+  font-weight: 500;
+}
+
+.flight-number {
+  color: #3D5DE2;
+  font-weight: 500;
+}
+
+
+.flight-dep-iata {
+  border-radius: 4px;
+  background: #F2F2F2;
+  padding: 4px;
+}
+
+
+.accordion-body-header {
+  border: 1px solid #EBF1F4;
+  padding: 10px;
+}
+
 /* media */
