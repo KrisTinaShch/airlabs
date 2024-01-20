@@ -2,6 +2,7 @@
 
 * {
   font-family: Inter;
+  scroll-behavior: smooth;
   color: #363B49;
 }
 
@@ -194,6 +195,15 @@ button.active .st0 {
 
 .flight-delay {
   font-size: 14px;
+}
+
+.flight-flag img {
+  width: 50px;
+  height: 50px;
+}
+
+.accordion-collapse {
+  transition: 0.5s ease;
 }
 
 /* media */
