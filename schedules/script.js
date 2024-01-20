@@ -77,8 +77,17 @@ async function createAccordionItems(data, counter = "0") {
     tempDiv.innerHTML = itemMarkup;
     fragment.appendChild(tempDiv.firstElementChild);
   }
-
+  
   accordion.appendChild(fragment);
+    const accordionItems = document.querySelectorAll('.accordion-collapse');
+    accordionItems.forEach((item)=>{
+      console.log(window.innerWidth)
+      if(window.innerWidth<768){
+        item.classList.add('show');
+      }else{
+        item.classList.remove('show');
+      }
+    });
 }
 
 async function generateAccordionItemMarkup(item, counter) {
@@ -86,7 +95,7 @@ async function generateAccordionItemMarkup(item, counter) {
   const airportArrivalsInfo = JSON.parse(localStorage.getItem(`airport_${iata}`)) || await getAirportName(item.arr_iata);
   return `
         <div class="accordion-item px-0 px-sm-3">
-    <h2 class="accordion-header " id="panelsStayOpen-heading${counter}">
+    <h2 class="accordion-header d-none d-md-block " id="panelsStayOpen-heading${counter}">
         <button class="accordion-button p-0 py-3 " type="button" data-bs-toggle="collapse"
             data-bs-target="#panelsStayOpen-collapse${counter}" aria-expanded="true"
             aria-controls="panelsStayOpen-collapse${counter}">
