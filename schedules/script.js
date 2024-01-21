@@ -122,7 +122,7 @@ async function generateAccordionItemMarkup(item, counter) {
                             <div class="time fw-normal">${checkArrivalTime(item.dep_estimated, item.dep_time)}</div>
                             <div class="flight-delay fw-normal text-danger text-decoration-line-through">
                                 ${formatTime(item.dep_time)}</div>
-                            <div class="country-code d-block d-md-none">${item.dep_iata}</div>
+                            <div class="country-code d-block d-md-none blue-iata-mobile ">${item.dep_iata}</div>
                         </div>
                         <div class="col-md-8 col-6 mx-md-auto d-flex flex-column align-items-center gap-1 p-0 justify-content-center">
                             <div class="flight-flag mb-2">
@@ -131,8 +131,8 @@ async function generateAccordionItemMarkup(item, counter) {
                             <div class="flight-line">
                                 <img src="../images/plane-trip.svg" alt="">
                             </div>
-                            <div class="text-muted mt-2">${toHoursAndMinutes(item.duration)}</div>
-                            <div class="text-muted">${item.airline_iata} ${item.flight_number}</div>
+                            <div class="text-muted mt-2 flight-info">${toHoursAndMinutes(item.duration)}</div>
+                            <div class="text-muted flight-info">${item.airline_iata} ${item.flight_number}</div>
                         </div>
                         <div class="col-md-2 col-2 p-0 text-end ">
                             <div class="airport-name d-none d-md-block fw-bold">${airportArrivalsInfo.airport_name}
@@ -145,18 +145,18 @@ async function generateAccordionItemMarkup(item, counter) {
                             <div
                                 class="flight-status rounded fw-bold text-center d-block d-md-none ${checkFlightStatus(item.status)}">
                                 ${item.status}</div>
-                            <div class="country-code d-block d-md-none fw-bold blue-font">TIV </div>
+                            <div class="country-code d-block d-md-none blue-iata-mobile float-end">${item.arr_iata} </div>
                         </div>
                         <div class="col-md-12 mt-4 d-none d-md-block p-0 pb-3">
                             <div class="d-flex gap-5 justify-content-between">
                                 <div class="d-flex gap-3 border rounded">
                                     <div class="p-2 pe-4 border-end">
                                         <p class="text-muted">Terminal</p>
-                                        <p class="fw-bold">2</p>
+                                        <p class="fw-bold">${item.dep_terminal}</p>
                                     </div>
                                     <div class="p-2 pe-4">
                                         <p class="text-muted">Gate</p>
-                                        <p class="fw-bold">B13</p>
+                                        <p class="fw-bold">${item.dep_gate}</p>
                                     </div>
                                 </div>
 
@@ -187,16 +187,7 @@ async function generateAccordionItemMarkup(item, counter) {
   `
 }
 
-
-// Форматирование даты 
 function formatTime(date_string) {
-  const date_string_date = new Date(date_string);
-  const date_string_hours = date_string_date.getHours();
-  const date_string_minutes = date_string_date.getMinutes();
-  return date_string_hours.toString().padStart(2, '0') + ':' + date_string_minutes.toString().padStart(2, '0');
-}
-
-function formatTimePMandAM(date_string) {
   const date_string_date = new Date(date_string);
   return `${date_string_date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
 }

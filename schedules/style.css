@@ -228,3 +228,22 @@ button.active .st0 {
     border: none;
   }
 }
+
+@media screen and (max-width:426px) {
+  .date{
+    font-size: 12px;
+  }
+  .flight-delay , .time{
+    font-size: 12.5px;
+  }
+  .blue-iata-mobile{
+    color: #3D5DE2;
+    background: #E7EBFF;
+    width: fit-content;
+    padding: 0 5px;
+    font-size: 13px;
+  }
+  .flight-info{
+    font-size: 13px;
+  }
+}
