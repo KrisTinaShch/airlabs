@@ -1,7 +1,9 @@
 const accordionButton = document.querySelector('.accordion-button');
 const accordionItem = document.querySelector('.accordion-item');
 const accordionCollapse = document.querySelectorAll('.accordion-collapse');
-
+const currentUTCTime1 = new Date();
+const currentUTCTime = `${currentUTCTime1.getUTCHours()}:${currentUTCTime1.getUTCMinutes()}`
+console.log(`${currentUTCTime1.getUTCHours()}:${currentUTCTime1.getUTCMinutes()}`);
 
 // accordionButton.addEventListener("click", () => {
 //   if (!accordionButton.classList.contains('collapsed')) {
@@ -76,23 +78,42 @@ async function createAccordionItems(data, counter = "0") {
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = itemMarkup;
     fragment.appendChild(tempDiv.firstElementChild);
+
   }
-  
   accordion.appendChild(fragment);
-    const accordionItems = document.querySelectorAll('.accordion-collapse');
-    accordionItems.forEach((item)=>{
-      console.log(window.innerWidth)
-      if(window.innerWidth<768){
-        item.classList.add('show');
-      }else{
-        item.classList.remove('show');
-      }
-    });
+
+  const accordionItems = document.querySelectorAll('.accordion-collapse');
+  accordionItems.forEach((item) => {
+    if (window.innerWidth < 768) {
+      item.classList.add('show');
+    } else {
+      item.classList.remove('show');
+    }
+  });
+
+
 }
+
+
 
 async function generateAccordionItemMarkup(item, counter) {
   const airportDataDep = await getAirportName(item.dep_iata);
   const airportArrivalsInfo = JSON.parse(localStorage.getItem(`airport_${iata}`)) || await getAirportName(item.arr_iata);
+  const flightStatus = checkFlightStatus(item.status);
+  const depUTCTimeNom = new Date(item.dep_estimated);
+  const arrUTCTimeNom = new Date(item.arr_estimated);
+  const depUTCTime = new Date(item.dep_estimated_utc);
+  const arrUTCTime = new Date(item.arr_estimated_utc);
+  if (item.dep_estimated_utc) {
+    if (item.arr_estimated_utc) {
+      
+
+      console.log(`${depUTCTime.getUTCHours()}:${depUTCTime.getUTCMinutes()}(${depUTCTimeNom.getUTCHours()}:${depUTCTimeNom.getUTCMinutes()}) - ${item.airline_iata} ${item.flight_number} - ${arrUTCTime.getUTCHours()}:${arrUTCTime.getUTCMinutes()}(${arrUTCTimeNom.getUTCHours()}:${arrUTCTimeNom.getUTCMinutes()}) === ${currentUTCTime}`);
+
+    }
+  }
+
+  
   return `
         <div class="accordion-item px-0 px-sm-3">
     <h2 class="accordion-header d-none d-md-block " id="panelsStayOpen-heading${counter}">
@@ -102,7 +123,7 @@ async function generateAccordionItemMarkup(item, counter) {
             <span class="fw-normal">${checkArrivalTime(item.arr_estimated, item.arr_time)}</span>
             <span class="blue-font">${item.airline_iata} ${item.flight_number}</span>
             <span
-                class="flight-status d-none d-md-block rounded fw-bold text-center ${checkFlightStatus(item.status)}">${item.status}</span>
+                class="flight-status d-none d-md-block rounded fw-bold text-center ${flightStatus}">${item.status}</span>
             <span>${airportArrivalsInfo.city} <span class="airport-code">${item.dep_iata}</span> </span>
         </button>
     </h2>
@@ -128,8 +149,8 @@ async function generateAccordionItemMarkup(item, counter) {
                             <div class="flight-flag mb-2">
                                 <img src="https://airlabs.co/img/airline/m/${item.airline_iata}.png" alt="" class="rounded-circle">
                             </div>
-                            <div class="flight-line">
-                                <img src="../images/plane-trip.svg" alt="">
+                            <div class="flight-line position-relative">
+                                <img src="../images/plane-trip.svg" alt="" class="plane-image ${flightStatus}" style="${flightStatus == "active" ? getActiveFlightPostion(item.dep_estimated_utc) : flightStatus}">
                             </div>
                             <div class="text-muted mt-2 flight-info">${toHoursAndMinutes(item.duration)}</div>
                             <div class="text-muted flight-info">${item.airline_iata} ${item.flight_number}</div>
@@ -143,7 +164,7 @@ async function generateAccordionItemMarkup(item, counter) {
                             <div class="flight-delay fw-normal text-danger text-decoration-line-through">
                                 ${formatTime(item.arr_time)}</div>
                             <div
-                                class="flight-status rounded fw-bold text-center d-block d-md-none ${checkFlightStatus(item.status)}">
+                                class="flight-status rounded fw-bold text-center d-block d-md-none ${flightStatus}">
                                 ${item.status}</div>
                             <div class="country-code d-block d-md-none blue-iata-mobile float-end">${item.arr_iata} </div>
                         </div>
@@ -185,6 +206,10 @@ async function generateAccordionItemMarkup(item, counter) {
     </div>
 </div>
   `
+}
+
+function getActiveFlightPostion(depUTCTime) {
+  // console.log(depUTCTime);
 }
 
 function formatTime(date_string) {
@@ -239,6 +264,7 @@ function toHoursAndMinutes(totalMinutes) {
 document.addEventListener('DOMContentLoaded', (event) => {
   fetchData();
 });
+
 
 
 
