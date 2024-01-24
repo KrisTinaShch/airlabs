@@ -154,10 +154,16 @@ button.active .st0 {
   right: 0;
 }
 
-.flight-line img {
+.plane-image {
   position: absolute;
-  transform: translate(5px, -50%);
+  transform: translate(4px, -50%);
 }
+
+.plane-image.landed {
+  left: calc(100% - 23px);
+}
+
+.plane-image.active {}
 
 .flight-status {
   background: #F7EDED;
@@ -206,6 +212,34 @@ button.active .st0 {
   transition: 0.5s ease;
 }
 
+.city-name {
+  font-size: 15px;
+}
+
+.plane-image {
+  margin-top: -6.4px;
+  border-radius: 50%;
+  animation: pulse 1.3s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 #7E869B;
+  }
+
+  70% {
+    transform: scale(1.3);
+    box-shadow: 0 0 0 6px #7e869b00;
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 #7e869b00;
+  }
+}
+
+
 /* media */
 
 @media screen and (max-width:768px) {
@@ -227,23 +261,39 @@ button.active .st0 {
   .accordion-item {
     border: none;
   }
+
+  .accordion-item {
+    max-width: 100%;
+  }
 }
 
 @media screen and (max-width:426px) {
-  .date{
+  .date {
     font-size: 12px;
   }
-  .flight-delay , .time{
+
+  .flight-delay {
+    font-size: 11px;
+  }
+
+  .time {
     font-size: 12.5px;
   }
-  .blue-iata-mobile{
+
+  .blue-iata-mobile {
     color: #3D5DE2;
     background: #E7EBFF;
     width: fit-content;
     padding: 0 5px;
     font-size: 13px;
   }
-  .flight-info{
+
+  .flight-info {
     font-size: 13px;
+  }
+
+  .city-name {
+    font-size: 14px;
+    word-wrap: break-word;
   }
 }
