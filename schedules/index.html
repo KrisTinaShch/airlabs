@@ -8,12 +8,12 @@
   <title>AirLabs - Schedules</title>
 
   <!-- styles -->
-  <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="style.css">
 
   <!-- scripts -->
   <script src="script.js" defer></script>
-  <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="../node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
 
 </head>
 
@@ -49,29 +49,27 @@
 
           Departures</button>
       </div>
+
     </nav>
 
     <div class="tab-content" id="nav-tabContent">
 
       <div class="tab-pane fade show active" id="nav-arrivals" role="tabpanel" aria-labelledby="nav-arrivals-tab">
         <div class="accordionArrivals" id="accordionPanelsStayOpenExampleArrivals">
-            
+<button id="loadMoreArrivals" class="btn btn-primary">Load More Arrivals</button>
+<!-- <button id="loadMoreDepartures" class="btn btn-primary">Load More Departures</button> -->
         </div>
       </div>
 
       <div class="tab-pane fade" id="nav-departures" role="tabpanel" aria-labelledby="nav-departures-tab">
         <div class="tab-content" id="nav-tabContent-2">
-          <div class="tab-pane fade show active" id="nav-international-departures" role="tabpanel"
-            aria-labelledby="nav-international-departures-tab">
             <div class="accordionDepartures" id="accordionPanelsStayOpenExampleDepartures">
-            
+
             </div>
-          </div>
         </div>
       </div>
     </div>
   </div>
-
 
 
 </body>

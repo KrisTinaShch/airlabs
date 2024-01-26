@@ -8,7 +8,7 @@ function getQueryVariables() {
   let query = window.location.search.substring(1);
   let vars = query.split('&');
   let result = {
-    iata: 'SIN',
+    iata: 'VAR',
     api_key: 'SERGEY-STAM-KEY'
   };
 
@@ -27,12 +27,17 @@ function getQueryVariables() {
   return result;
 }
 
-const fetchData = async () => {
-  const resultArrivals = await fetch(arrivalsLink);
+let currentArrivalsIndex = 0;
+let currentDeparturesIndex = 0;
+
+const fetchDataArrivals = async () => {
+  const resultArrivals = await fetch(`${arrivalsLink}&limit=50&offset=${currentArrivalsIndex}`);
   const dataArrivals = await resultArrivals.json();
+  currentArrivalsIndex += 50; 
   await createAccordionItems(dataArrivals, 0, "Arrivals");
 
 };
+
 const fetchDataDepartures = async () => {
   const resultdDepartures = await fetch(departuresLink);
   const dataDepartures = await resultdDepartures.json();
@@ -40,25 +45,8 @@ const fetchDataDepartures = async () => {
 }
 
 
-async function getAirportName(iata) {
-  const response = await fetch(`https://airlabs.co/api/v9/airports?iata_code=${iata}&api_key=${api_key}`);
-  const data = await response.json();
-
-  if (data.response && data.response.length > 0) {
-    const airportData = {
-      iata: data.response[0].iata_code,
-      city: data.response[0].city,
-      airport_name: data.response[0].name,
-    };
-    localStorage.setItem(`airport_${iata}`, JSON.stringify(airportData));
-    return airportData;
-  } else {
-    return null;
-  }
-}
-
 async function createAccordionItems(data, counter = "0", accordionType) {
-  // create accordion items
+  // Сreate accordion items
   const accordion = document.querySelector(`.accordion${accordionType}`);
   const fragment = document.createDocumentFragment();
   for (const item of data.response) {
@@ -71,7 +59,7 @@ async function createAccordionItems(data, counter = "0", accordionType) {
   }
   accordion.appendChild(fragment);
 
-  // change the appearance of the accordion on the mobile 
+  // Сhanging the appearance of accordion on the mobile
   const accordionItems = document.querySelectorAll('.accordion-collapse');
   accordionItems.forEach((item) => {
     if (window.innerWidth < 768) {
@@ -81,7 +69,7 @@ async function createAccordionItems(data, counter = "0", accordionType) {
     }
   });
 
-  // add accordion item shadow 
+  // Adding a Shadow to Accordion Elements
   const accordionButtons = document.querySelectorAll('.accordion-button');
   const accordionItem = document.querySelectorAll('.accordion-item');
   accordionButtons.forEach((button, index) => {
@@ -100,31 +88,59 @@ async function createAccordionItems(data, counter = "0", accordionType) {
 }
 
 
+function getActualFlightTime(time, estimatedTime) {
+  const flightTime = estimatedTime && estimatedTime !== '-' ? estimatedTime : time;
+  return flightTime;
+}
+
+//Функция для получения данных о аэропортах и сохранения их в localStorage
+async function fetchAndSaveAirports() {
+  try {
+    const response = await fetch(`https://airlabs.co/api/v9/airports?api_key=${api_key}&_fields=iata_code,city,name`);
+    const data = await response.json();
+    const airports = {};
+    data.response.forEach((airport) => {
+      airports[airport.iata_code] = {
+        name: airport.name,
+        city: airport.city
+      };
+    });
+    localStorage.setItem('airports', JSON.stringify(airports));
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+function getAirportsFromLocalStorage() {
+  const airports = localStorage.getItem('airports');
+  return airports ? JSON.parse(airports) : {};
+}
+fetchAndSaveAirports();
+
+const airportsMapping = getAirportsFromLocalStorage();
+console.log(airportsMapping);
 
 async function generateAccordionItemMarkup(item, counter, accordionType) {
-
-  const airportDataDep = await getAirportName(item.dep_iata);
-  const airportArrivalsInfo = JSON.parse(localStorage.getItem(`airport_${iata}`)) || await getAirportName(item.arr_iata);
-
+  const dep_iata = item.dep_iata;
+  const arr_iata = item.arr_iata;
   const flightInfo = {
     status: item.status,
     flightNumber: `${item.airline_iata || ' '} ${item.flight_number || ' '}`,
     flightDuration: item.duration || '-',
-    airlineIata: item.airline_iata || ' ',
+    airlineIata: item.airline_iata || '',
     // departures
     departureIata: item.dep_iata || '-',
-    departureTime: item.dep_time || '-',
-    departureEstimated: item.dep_estimated|| ' - ',
-    departureUTCTime: item.dep_time_utc|| ' - ',
-    departureEstimatedUTCTime: item.dep_estimated_utc|| ' - ',
-    departureTerminal: item.dep_terminal|| ' - ',
-    departureGate: item.dep_gate|| ' - ',
+    departureTime: item.dep_time,
+    departureEstimated: item.dep_estimated,
+    departureUTCTime: item.dep_time_utc,
+    departureEstimatedUTCTime: item.dep_estimated_utc,
+    departureTerminal: item.dep_terminal || ' - ',
+    departureGate: item.dep_gate || ' - ',
     // arrivals
     arrivalsIata: item.arr_iata || '-',
-    arrivalsTime: item.arr_time || '-',
-    arrivalsEstimated: item.arr_estimated || '-',
-    arrivalsUTCTime: item.arr_time_utc || '-',
-    arrivalsEstimatedUTCTime: item.arr_estimated_utc || '-',
+    arrivalsTime: item.arr_time,
+    arrivalsEstimated: item.arr_estimated,
+    arrivalsUTCTime: item.arr_time_utc,
+    arrivalsEstimatedUTCTime: item.arr_estimated_utc,
     arrivalsTerminal: item.arr_terminal || '-',
     arrivalsGate: item.gate || '-',
     arrivalsBaggage: item.arr_baggage || '-',
@@ -136,13 +152,11 @@ async function generateAccordionItemMarkup(item, counter, accordionType) {
       const arrTest = new Date(actualFlightUTCArrivial);
       const totalDifference = (arrTest - depTest) / (1000 * 60); // in minutes
       const restTimeFlight = Math.round((arrTest - currentTimeUTC) / (1000 * 60)); // in minutes
-      if (currentTimeUTC > depTest && currentTimeUTC < arrTest) {
-        const restTimeFlightInPercent = Math.round((restTimeFlight * 100) / (totalDifference));
-        return `left:${83 - restTimeFlightInPercent}%`;
-      }
+      const restTimeFlightInPercent = Math.round((restTimeFlight * 100) / (totalDifference));
+      return `left:${83 - restTimeFlightInPercent}%`;
     },
   }
-  flightInfo.getCurrentFlightTime();
+  // console.log(airportsMapping[dep_iata]);
   return `
         <div class="accordion-item px-0 px-sm-3 py-3">
     <h2 class="accordion-header d-none d-md-block " id="panelsStayOpen${accordionType}-heading${counter}">
@@ -150,9 +164,9 @@ async function generateAccordionItemMarkup(item, counter, accordionType) {
             data-bs-target="#panelsStayOpen${accordionType}-collapse${counter}" aria-expanded="true"
             aria-controls="panelsStayOpen${accordionType}-collapse${counter}">
             <span class="fw-normal">${formatTime(flightInfo.departureTime)}</span>
-            <span class="blue-font">${flightInfo.flightNumber }</span>
-            <span class="flight-status d-none d-md-block rounded fw-bold text-center ${flightInfo.status }">${flightInfo.status }</span>
-            <span>${airportArrivalsInfo.city } <span class="airport-code">${flightInfo.departureIata }</span> </span>
+            <span class="blue-font">${flightInfo.flightNumber}</span>
+            <span class="flight-status d-none d-md-block rounded fw-bold text-center ${flightInfo.status}">${flightInfo.status}</span>
+            <span>${airportsMapping[arr_iata].city} <span class="airport-code">${flightInfo.departureIata}</span> </span>
         </button>
     </h2>
     <div id="panelsStayOpen${accordionType}-collapse${counter}" class="accordion-collapse collapse"
@@ -163,59 +177,59 @@ async function generateAccordionItemMarkup(item, counter, accordionType) {
                     <div class="row justify-content-between py-3 px-2 border rounded mb-0 position-relative align-items-center row-gap-0">
                         <div class="col-md-2 col-3 p-0">
                             <div class="airport-name d-none d-md-block fw-bold">
-                                ${airportDataDep.airport_name }
-                                <span class="airport-code">${flightInfo.departureIata }</span>
+                                ${airportsMapping[dep_iata].name}
+                                <span class="airport-code">${flightInfo.departureIata}</span>
                             </div>
-                            <div class="city-name fw-bold">${airportDataDep.city }</div>
+                            <div class="city-name fw-bold">${airportsMapping[dep_iata].city}</div>
                             <div class="date text-muted">${formatDate(flightInfo.departureTime)}</div>
                             <div class="time fw-bold">${checkEstimatedTime(item.dep_estimated, item.dep_time)}</div>
-                            <div class="country-code d-block d-md-none blue-iata-mobile ">${flightInfo.departureIata }</div>
+                            <div class="country-code d-block d-md-none blue-iata-mobile ">${flightInfo.departureIata}</div>
                         </div>
                         <div class="col-md-8 col-6 mx-md-auto d-flex flex-column align-items-center gap-1 p-0 justify-content-center">
                             <div class="flight-flag mb-2">
-                                <img src="${flightInfo.airlineIata ? `https://airlabs.co/img/airline/m/${flightInfo.airlineIata}.png` : "images/placeholder.png"}" alt="" class="rounded-circle">
+                                <img src="${flightInfo.airlineIata ? `https://airlabs.co/img/airline/m/${flightInfo.airlineIata}.png` : "../images/placeholder.png"}" alt="" class="rounded-circle">
                             </div>
                             <div class="flight-line position-relative">
-                                <img src="images/plane-trip.svg" alt="" class="plane-image ${flightInfo.status}" style="${flightInfo.status == 'active' ? flightInfo.getCurrentFlightTime() : ''}">
+                                <img src="../images/plane-trip.svg" alt="" class="plane-image ${flightInfo.status}" style="${flightInfo.status == 'active' ? flightInfo.getCurrentFlightTime() : ''}">
                             </div>
                             <div class="text-muted mt-2 flight-info">${toHoursAndMinutes(flightInfo.flightDuration)}</div>
-                            <div class="text-muted flight-info">${flightInfo.flightNumber }</div>
+                            <div class="text-muted flight-info">${flightInfo.flightNumber}</div>
                         </div>
                         <div class="col-md-2 col-3 p-0 text-end ">
-                            <div class="airport-name d-none d-md-block fw-bold">${airportArrivalsInfo.airport_name }
-                                <span class="airport-code">${flightInfo.arrivalsIata }</span></div>
-                            <div class="city-name fw-bold">${airportArrivalsInfo.city }</div>
+                            <div class="airport-name d-none d-md-block fw-bold">${airportsMapping[arr_iata].name}
+                                <span class="airport-code">${flightInfo.arrivalsIata}</span></div>
+                            <div class="city-name fw-bold">${airportsMapping[arr_iata].city}</div>
                             <div class="date text-muted">${formatDate(flightInfo.arrivalsTime)}</div>
                             <div class="time fw-bold"> ${checkEstimatedTime(item.arr_estimated, item.arr_time)}</div>
-                            <div class="flight-status rounded fw-bold text-center d-block d-md-none ${flightInfo.status }">
-                                ${flightInfo.status }</div>
-                            <div class="country-code d-block d-md-none blue-iata-mobile float-end">${flightInfo.arrivalsIata } </div>
+                            <div class="flight-status rounded fw-bold text-center d-block d-md-none ${flightInfo.status}">
+                                ${flightInfo.status}</div>
+                            <div class="country-code d-block d-md-none blue-iata-mobile float-end">${flightInfo.arrivalsIata} </div>
                         </div>
                         <div class="col-md-12 mt-4 d-none d-md-block p-0 pb-3">
                             <div class="d-flex gap-5 justify-content-between">
                                 <div class="d-flex gap-3 border rounded">
                                     <div class="p-2 pe-4 border-end">
                                         <p class="text-muted">Terminal</p>
-                                        <p class="fw-bold">${flightInfo.departureTerminal }</p>
+                                        <p class="fw-bold">${flightInfo.departureTerminal}</p>
                                     </div>
                                     <div class="p-2 pe-4">
                                         <p class="text-muted">Gate</p>
-                                        <p class="fw-bold">${flightInfo.departureGate }</p>
+                                        <p class="fw-bold">${flightInfo.departureGate}</p>
                                     </div>
                                 </div>
 
                                 <div class="d-flex gap-3 border rounded">
                                     <div class="p-2 pe-4 border-end">
                                         <p class="text-muted">Terminal</p>
-                                        <p class="fw-bold">${flightInfo.arrivalsTerminal }</p>
+                                        <p class="fw-bold">${flightInfo.arrivalsTerminal}</p>
                                     </div>
                                     <div class="p-2 pe-4 border-end">
                                         <p class="text-muted">Gate</p>
-                                        <p class="fw-bold">${flightInfo.arrivalsGate }</p>
+                                        <p class="fw-bold">${flightInfo.arrivalsGate}</p>
                                     </div>
                                     <div class="p-2 pe-4">
                                         <p class="text-muted">Baggage Claim</p>
-                                        <p class="fw-bold">${flightInfo.arrivalsBaggage }</p>
+                                        <p class="fw-bold">${flightInfo.arrivalsBaggage}</p>
                                     </div>
                                 </div>
                             </div>
@@ -228,13 +242,7 @@ async function generateAccordionItemMarkup(item, counter, accordionType) {
 </div>
   `
 }
-function getActualFlightTime(time, estimatedTime) {
-  let flightTime;
-  return estimatedTime ? flightTime = estimatedTime : flightTime = time;
-}
-function getActiveFlightPostion(depUTCTime) {
-  // console.log(depUTCTime);
-}
+
 
 // Change time format to AM/PM
 function formatTime(time_string) {
@@ -258,9 +266,18 @@ function toHoursAndMinutes(totalMinutes) {
   return `${hours} hr ${minutes > 0 ? ` ${minutes} min` : ''}`;
 }
 
+const loadMoreArrivalsButton = document.querySelector("#loadMoreArrivals");
+// const loadMoreDeparturesButton = document.querySelector("#loadMoreDepartures");
 
+loadMoreArrivalsButton.addEventListener("click", () => {
+  fetchDataArrivals();
+});
+
+// loadMoreDeparturesButton.addEventListener("click", () => {
+//   fetchDataDepartures();
+// });
 document.addEventListener('DOMContentLoaded', (event) => {
-  fetchData();
+  fetchDataArrivals();
   fetchDataDepartures();
 });
 
