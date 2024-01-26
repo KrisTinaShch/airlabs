@@ -187,10 +187,10 @@ async function generateAccordionItemMarkup(item, counter, accordionType) {
                         </div>
                         <div class="col-md-8 col-6 mx-md-auto d-flex flex-column align-items-center gap-1 p-0 justify-content-center">
                             <div class="flight-flag mb-2">
-                                <img src="${flightInfo.airlineIata ? `https://airlabs.co/img/airline/m/${flightInfo.airlineIata}.png` : "../images/placeholder.png"}" alt="" class="rounded-circle">
+                                <img src="${flightInfo.airlineIata ? `https://airlabs.co/img/airline/m/${flightInfo.airlineIata}.png` : "images/placeholder.png"}" alt="" class="rounded-circle">
                             </div>
                             <div class="flight-line position-relative">
-                                <img src="../images/plane-trip.svg" alt="" class="plane-image ${flightInfo.status}" style="${flightInfo.status == 'active' ? flightInfo.getCurrentFlightTime() : ''}">
+                                <img src="images/plane-trip.svg" alt="" class="plane-image ${flightInfo.status}" style="${flightInfo.status == 'active' ? flightInfo.getCurrentFlightTime() : ''}">
                             </div>
                             <div class="text-muted mt-2 flight-info">${toHoursAndMinutes(flightInfo.flightDuration)}</div>
                             <div class="text-muted flight-info">${flightInfo.flightNumber}</div>
