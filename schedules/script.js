@@ -113,7 +113,6 @@ function getAirportsFromLocalStorage() {
 fetchAndSaveAirports();
 
 const airportsMapping = getAirportsFromLocalStorage();
-console.log(airportsMapping);
 
 async function generateAccordionItemMarkup(item, counter, accordionType) {
   const dep_iata = item.dep_iata;
