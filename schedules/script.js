@@ -27,13 +27,10 @@ function getQueryVariables() {
   return result;
 }
 
-let currentArrivalsIndex = 0;
-let currentDeparturesIndex = 0;
 
 const fetchDataArrivals = async () => {
-  const resultArrivals = await fetch(`${arrivalsLink}&limit=50&offset=${currentArrivalsIndex}`);
+  const resultArrivals = await fetch(arrivalsLink);
   const dataArrivals = await resultArrivals.json();
-  currentArrivalsIndex += 50; 
   await createAccordionItems(dataArrivals, 0, "Arrivals");
 
 };
@@ -93,7 +90,6 @@ function getActualFlightTime(time, estimatedTime) {
   return flightTime;
 }
 
-//Функция для получения данных о аэропортах и сохранения их в localStorage
 async function fetchAndSaveAirports() {
   try {
     const response = await fetch(`https://airlabs.co/api/v9/airports?api_key=${api_key}&_fields=iata_code,city,name`);
@@ -156,7 +152,7 @@ async function generateAccordionItemMarkup(item, counter, accordionType) {
       return `left:${83 - restTimeFlightInPercent}%`;
     },
   }
-  // console.log(airportsMapping[dep_iata]);
+
   return `
         <div class="accordion-item px-0 px-sm-3 py-3">
     <h2 class="accordion-header d-none d-md-block " id="panelsStayOpen${accordionType}-heading${counter}">
@@ -187,10 +183,10 @@ async function generateAccordionItemMarkup(item, counter, accordionType) {
                         </div>
                         <div class="col-md-8 col-6 mx-md-auto d-flex flex-column align-items-center gap-1 p-0 justify-content-center">
                             <div class="flight-flag mb-2">
-                                <img src="${flightInfo.airlineIata ? `https://airlabs.co/img/airline/m/${flightInfo.airlineIata}.png` : "images/placeholder.png"}" alt="" class="rounded-circle">
+                                <img src="${flightInfo.airlineIata ? `https://airlabs.co/img/airline/m/${flightInfo.airlineIata}.png` : "../images/placeholder.png"}" alt="" class="rounded-circle">
                             </div>
                             <div class="flight-line position-relative">
-                                <img src="images/plane-trip.svg" alt="" class="plane-image ${flightInfo.status}" style="${flightInfo.status == 'active' ? flightInfo.getCurrentFlightTime() : ''}">
+                                <img src="../images/plane-trip.svg" alt="" class="plane-image ${flightInfo.status}" style="${flightInfo.status == 'active' ? flightInfo.getCurrentFlightTime() : ''}">
                             </div>
                             <div class="text-muted mt-2 flight-info">${toHoursAndMinutes(flightInfo.flightDuration)}</div>
                             <div class="text-muted flight-info">${flightInfo.flightNumber}</div>
@@ -266,22 +262,8 @@ function toHoursAndMinutes(totalMinutes) {
   return `${hours} hr ${minutes > 0 ? ` ${minutes} min` : ''}`;
 }
 
-const loadMoreArrivalsButton = document.querySelector("#loadMoreArrivals");
-// const loadMoreDeparturesButton = document.querySelector("#loadMoreDepartures");
 
-loadMoreArrivalsButton.addEventListener("click", () => {
-  fetchDataArrivals();
-});
-
-// loadMoreDeparturesButton.addEventListener("click", () => {
-//   fetchDataDepartures();
-// });
 document.addEventListener('DOMContentLoaded', (event) => {
   fetchDataArrivals();
   fetchDataDepartures();
 });
-
-
-
-
-
